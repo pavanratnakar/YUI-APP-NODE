@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Pavan Ratnakar Applications : YUI Framework/NodeJS application</title>
+</head>
+<body>
+    <header>
+        <h1>Weather Forecast : Built Using YUI Framework/NodeJS : Pavan Ratnakar</h1>
+    </header>
+    <div id="weather-container">
+        <div class="weather"></div>
+        <p class="location"></p>
+    </div>
+    <div id="clouds"></div>
+    <script src="http://yui.yahooapis.com/3.8.0/build/yui/yui-min.js"></script>
+    <script>
+    window.YUI_config = window.YUI_config || {groups:{}};
+    YUI_config = {
+        "debug": true,
+        "lang": "en-US",
+        "combine": false,
+        "modules": {
+           "weatherCss": {
+                "requires": ['cssreset','cssfonts'],
+                "fullpath": "/weather/css/style.css",
+                "type": "css"
+            },
+            "weatherModel": {
+                "requires": [
+                    "model",
+                    "yql"
+                ],
+                "fullpath": "/weather/js/models/weather.js",
+                "type": "js"
+            },
+            "weatherView": {
+                "requires": [
+                    "view",
+                    "io-base",
+                    "weatherModel",
+                    "handlebars",
+                    "weatherCss"
+                ],
+                "fullpath": "/weather/js/views/weather.View.js",
+                "type": "js"
+            }
+        }
+    };
+    YUI().use('app','weatherModel','weatherView', function (Y) {
+        var app = new Y.App({
+            container : '#weather-container',
+            views: {
+                weatherView: {type: 'WeatherView'}
+            }
+        }),
+        t = this,
+        weather = new Y.Weather();
+
+        weather.on('save',function(){
+            app.showView('weatherView',{
+                model : weather,
+                container : app.get('container') 
+            }); 
+        });
+        app.route('/', function () {
+            weather.save({woeid : '90210'});
+        });
+        app.route('/*', function (req) {
+            Y.log(req);
+            weather.save({woeid : req.path.replace('/','')});
+        });
+        app.render().dispatch();
+    });
+    </script>
+</body>
+</html>
